@@ -1,7 +1,15 @@
 const todoInput = document.querySelector("#todo-input");
 const todoList = document.querySelector("#todo-list");
 
-const createTodo = function () {
+//localStorage에 있는 data를 받아오고, 문자열로 변환된 data른 원형으로 되돌림
+const savedTodoList = JSON.parse(localStorage.getItem("saved-items"));
+
+const createTodo = function (storageData) {
+  let todoContents = todoInput.value;
+  if (storageData) {
+    //storageData가 있는 경우
+    todoContents = storageData.contents;
+  }
   const newLi = document.createElement("li");
   const newSpan = document.createElement("span");
   const newBtn = document.createElement("button");
@@ -10,13 +18,21 @@ const createTodo = function () {
   newBtn.addEventListener("click", () => {
     newLi.classList.toggle("complete");
     //toggle: 있으면 remove, 없으면 add
+    saveItemsFn();
   });
 
   newLi.addEventListener("dblclick", () => {
     newLi.remove();
+    saveItemsFn();
   });
 
-  newSpan.textContent = todoInput.value;
+  //optional chaining:
+  //storageData가 있으면 complete를 찾고, 없거나 null이면 찾지 않음.
+  if (storageData?.complete === true) {
+    newLi.classList.add("complete");
+  }
+
+  newSpan.textContent = todoContents;
   newLi.appendChild(newBtn);
   newLi.appendChild(newSpan);
   todoList.appendChild(newLi);
@@ -37,6 +53,7 @@ const deleteAll = function () {
   for (let i = 0; i < liList.length; i++) {
     liList[i].remove();
   }
+  saveItemsFn();
 };
 
 const saveItemsFn = function () {
@@ -50,5 +67,19 @@ const saveItemsFn = function () {
     };
     saveItems.push(todoObj);
   }
-  console.log(saveItems);
+
+  //삼항연산자
+  saveItems.length === 0
+    ? localStorage.removeItem("saved-items")
+    : localStorage.setItem("saved-items", JSON.stringify(saveItems));
+  //String(saveItems) 하면 에러남
+  //배열이나 객체를 문자열로 변환하기 위한 데이터 포맷: JSON
+  //console.log(JSON.stringify(saveItems));
 };
+
+// createTodo는 함수표현식 -> 호이스팅 문제로 이 if문을 가장 아래로 내렷다.
+if (savedTodoList) {
+  for (let i = 0; i < savedTodoList.length; i++) {
+    createTodo(savedTodoList[i]);
+  }
+}
