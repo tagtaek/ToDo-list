@@ -86,12 +86,23 @@ if (savedTodoList) {
 
 const weatherSearch = function (position) {
   fetch(
-    `https://api.openweathermap.org/data/2.5/onecall?lat=${position.latitude}&lon=${position.longitude}&appid=1294813a283563e298e1b432365374fe`
-  ).then((res) => {
-    console.log(res);
-  });
+    //비동기로 작동하는 함수는, then을 사용하여 기다려준다.
+    `https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=1294813a283563e298e1b432365374fe`
+  )
+    .then((res) => {
+      //JSON.parse() : response에 '바디'만 존재할 때 사용가능
+      return res.json(); //body + header까지 존재할 때
+    }) //json으로 변환하는 시간이 또 걸리므로 return해주고 또 then으로 받기
+    .then((json) => {
+      console.log(json.name, json.weather[0].description);
+    })
+    .catch((err) => {
+      //then과 붙어다니며 오류의 원인을 알려주는 메소드
+      console.log(err);
+    });
+
   //promise 객체: 아직 data를 받지 못했는데 console.log가 먼저실행되어
-  //데이터를 받아오겠다는 약속 객체
+  //데이터를 받아오겠다는 약속을 의미하는 객체
 };
 
 //위치 불러오는데 성공햇을 때 콜백함수
