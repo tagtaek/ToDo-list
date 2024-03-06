@@ -83,3 +83,30 @@ if (savedTodoList) {
     createTodo(savedTodoList[i]);
   }
 }
+
+const weatherSearch = function (position) {
+  fetch(
+    `https://api.openweathermap.org/data/2.5/onecall?lat=${position.latitude}&lon=${position.longitude}&appid=1294813a283563e298e1b432365374fe`
+  ).then((res) => {
+    console.log(res);
+  });
+  //promise 객체: 아직 data를 받지 못했는데 console.log가 먼저실행되어
+  //데이터를 받아오겠다는 약속 객체
+};
+
+//위치 불러오는데 성공햇을 때 콜백함수
+const accessToGeo = function (position) {
+  const positionObj = {
+    latitude: position.coords.latitude,
+    longitude: position.coords.longitude,
+  };
+
+  weatherSearch(positionObj);
+};
+
+const askForLocation = function () {
+  navigator.geolocation.getCurrentPosition(accessToGeo, (err) => {
+    console.log(err);
+  });
+};
+askForLocation();
