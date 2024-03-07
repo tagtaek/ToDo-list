@@ -42,7 +42,7 @@ const createTodo = function (storageData) {
 
 const keyCodeCheck = function () {
   //console.log(window.event); 이걸로 'enter' 키의 keyCode 확인
-  if (event.keyCode === 13 && todoInput.value !== "") {
+  if (event.keyCode === 13 && todoInput.value.trim() !== "") {
     //window는 전역객체로서, 최상위에 존재하는 객체이며, 생력가능
     createTodo();
   }
@@ -84,17 +84,27 @@ if (savedTodoList) {
   }
 }
 
-const weatherSearch = function (position) {
+const weatherDataActive = function ({ location, weather }) {
+  const locationNameTag = document.querySelector("#location-name-tag");
+  locationNameTag.textContent = location;
+};
+
+const weatherSearch = function ({ latitude, longitude }) {
+  //position 파라미터에 구조분해할당 적용
   fetch(
     //비동기로 작동하는 함수는, then을 사용하여 기다려준다.
-    `https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=1294813a283563e298e1b432365374fe`
+    `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=1294813a283563e298e1b432365374fe`
   )
     .then((res) => {
       //JSON.parse() : response에 '바디'만 존재할 때 사용가능
       return res.json(); //body + header까지 존재할 때
     }) //json으로 변환하는 시간이 또 걸리므로 return해주고 또 then으로 받기
     .then((json) => {
-      console.log(json.name, json.weather[0].description);
+      const weatherData = {
+        location: json.name,
+        weather: json.weather[0].main,
+      };
+      weatherDataActive(weatherData);
     })
     .catch((err) => {
       //then과 붙어다니며 오류의 원인을 알려주는 메소드
@@ -106,10 +116,16 @@ const weatherSearch = function (position) {
 };
 
 //위치 불러오는데 성공햇을 때 콜백함수
-const accessToGeo = function (position) {
+const accessToGeo = function ({ coords }) {
+  //position객체에서 coords를 파라미터로 바로 뽑아온다.(구조분해할당 적용)
+
+  //복사가아니라 구조분해할당에는 '...rest' 필요없음
+  const { latitude, longitude } = coords;
+  //shorthand property
   const positionObj = {
-    latitude: position.coords.latitude,
-    longitude: position.coords.longitude,
+    //키와 값이 똑같으면 이렇게 작성 가능
+    latitude,
+    longitude,
   };
 
   weatherSearch(positionObj);
@@ -121,3 +137,6 @@ const askForLocation = function () {
   });
 };
 askForLocation();
+
+//깊복, 얖복까지 듣고 원시타입과 참조타입 정리 -> spread연산자 및 객체 복사 정리
+//JSON 데이터활용 5:08
